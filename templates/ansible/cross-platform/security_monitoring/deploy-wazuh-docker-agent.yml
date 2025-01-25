@@ -1,0 +1,36 @@
+---
+- hosts: docker
+  connection: local
+  
+  tasks:
+
+  - name: include vars
+    include_vars: vars.yml
+
+  - name: Create config path
+    file:
+      path: "{{ service_config_dir }}"
+      state: directory
+      mode: 0755
+
+  - name: Copy config template to remote host
+    template:
+      src: "{{ playbook_dir }}/config/ossec.conf.j2"
+      dest: "{{ service_config_dir }}/ossec.conf"
+      mode: 0644
+    register: config_changed
+
+  - name: Run docker image
+    docker_container:
+      name: wazuh-agent-container
+      networks: 
+       - name: "{{ wazuh_agent_network }}"
+      image: "{{ wazuh_agent_image_name }}"
+      state: started
+      hostname: "{{ wazuh_agent_name }}"
+      auto_remove: false
+      env:
+       WAZUH_MANAGER: "{{ wazuh_manager_hostname }}"
+       WAZUH_AGENT_GROUP: "{{ wazuh_agent_group }}"
+      volumes:
+        - "{{ wazuh_agent_config_volume }}"

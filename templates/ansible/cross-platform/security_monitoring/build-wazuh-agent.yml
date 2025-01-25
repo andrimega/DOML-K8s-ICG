@@ -1,0 +1,22 @@
+---
+- hosts: docker
+  connection: local 
+  
+  tasks:
+
+  - name: include vars
+    include_vars: vars.yml
+
+  - name: Copy build dir to dest
+    copy:
+      src: "./docker-deploy"
+      dest: "{{ docker_image_build_dir }}"
+      mode: 0644
+
+  - name: Build docker image
+    community.docker.docker_image:
+      build:
+        path: "{{ docker_image_build_dir }}/docker-deploy"
+      name: "{{ wazuh_agent_image_name }}"
+      tag: latest
+      source: build

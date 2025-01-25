@@ -1,0 +1,5 @@
+[sma_host]
+localhost ansible_user=vagrant ansible_password=vagrant ansible_port=2222
+
+[docker]
+localhost

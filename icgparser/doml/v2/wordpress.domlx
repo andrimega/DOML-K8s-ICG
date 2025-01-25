@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="ASCII"?>
+<commons:DOMLModel xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:app="http://www.piacere-project.eu/doml/application" xmlns:commons="http://www.piacere-project.eu/doml/commons" xmlns:infra="http://www.piacere-project.eu/doml/infrastructure" name="wordpress" activeConfiguration="//@configurations.0" activeInfrastructure="//@concretizations.0">
+  <application name="app">
+    <components xsi:type="app:SoftwareComponent" name="mysql">
+      <annotations xsi:type="commons:SProperty" key="db_user" value="app1user"/>
+      <annotations xsi:type="commons:SProperty" key="db_password" value="app1user"/>
+      <annotations xsi:type="commons:SProperty" key="db_name" value="app1"/>
+      <exposedInterfaces name="DB_interface"/>
+    </components>
+    <components xsi:type="app:SoftwareComponent" name="wordpress" consumedInterfaces="//@application/@components.0/@exposedInterfaces.0">
+      <annotations xsi:type="commons:SProperty" key="wordpress_db_host" value="db_host"/>
+      <annotations xsi:type="commons:SProperty" key="wordpress_db_user" value="app1user"/>
+      <annotations xsi:type="commons:SProperty" key="wordpress_db_password" value="app1user"/>
+      <annotations xsi:type="commons:SProperty" key="wordpress_db_name" value="app1"/>
+      <annotations xsi:type="commons:SProperty" key="wordpress_table_prefix" value="wp"/>
+    </components>
+  </application>
+  <infrastructure name="infra">
+    <nodes xsi:type="infra:VirtualMachine" name="vm1" os="ubuntu-20.04.3" credentials="//@infrastructure/@credentials.0">
+      <ifaces name="i1" belongsTo="//@infrastructure/@networks.0"/>
+    </nodes>
+    <nodes xsi:type="infra:VirtualMachine" name="vm2" os="ubuntu-20.04.3" credentials="//@infrastructure/@credentials.0">
+      <ifaces name="i2" belongsTo="//@infrastructure/@networks.0"/>
+    </nodes>
+    <networks name="net1" protocol="tcp/ip" addressRange="10.10.10.0/24" connectedIfaces="//@infrastructure/@nodes.0/@ifaces.0 //@infrastructure/@nodes.1/@ifaces.0"/>
+    <credentials xsi:type="infra:KeyPair" name="ssh_key" keyfile="local path to ssh key"/>
+  </infrastructure>
+  <concretizations name="con_os_infra">
+    <providers name="openstack">
+      <vms name="concrete_vm1" maps="//@infrastructure/@nodes.0">
+        <annotations xsi:type="commons:SProperty" key="vm_flavor" value="small-centos"/>
+      </vms>
+      <vms name="concrete_vm2" maps="//@infrastructure/@nodes.1">
+        <annotations xsi:type="commons:SProperty" key="vm_flavor" value="small-centos"/>
+      </vms>
+      <networks name="concrete_net" maps="//@infrastructure/@networks.0"/>
+    </providers>
+  </concretizations>
+  <concretizations name="con_aws_infra">
+    <providers name="aws">
+      <vms name="concrete_vm1" maps="//@infrastructure/@nodes.0">
+        <annotations xsi:type="commons:SProperty" key="vm_flavor" value="t2.micro"/>
+      </vms>
+      <vms name="concrete_vm2" maps="//@infrastructure/@nodes.1">
+        <annotations xsi:type="commons:SProperty" key="vm_flavor" value="t2.micro"/>
+      </vms>
+      <networks name="concrete_net" maps="//@infrastructure/@networks.0"/>
+    </providers>
+  </concretizations>
+  <configurations name="config">
+    <deployments component="//@application/@components.0" node="//@infrastructure/@nodes.0"/>
+    <deployments component="//@application/@components.1" node="//@infrastructure/@nodes.1"/>
+  </configurations>
+</commons:DOMLModel>

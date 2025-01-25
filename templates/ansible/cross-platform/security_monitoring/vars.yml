@@ -1,0 +1,13 @@
+---
+service_config_dir: "{{ ansible_env.HOME }}/piacere-wazuh-agent"
+docker_image_build_dir: "{{ ansible_env.HOME }}/piacere-wazuh-agent/image"
+wazuh_manager_hostname: "{{ lookup('env', 'WAZUH_MANAGER_HOST' ) }}"
+wazuh_manager_port: "{{ lookup('env', 'WAZUH_MANAGER_PORT' ) }}"
+
+wazuh_agent_network: "security-monitoring-deployment_default"
+wazuh_agent_name: "wazuh-agent-container-2"
+wazuh_agent_group: "default"
+wazuh_agent_config_volume: "{{ service_config_dir }}/ossec.conf:/var/ossec/etc/ossec.conf"
+wazuh_agent_image_name: "wazuh-agent-image"
+
+piacere_deployment_id: "{{ lookup('env', 'DEPLOYMENT_ID' ) }}" 

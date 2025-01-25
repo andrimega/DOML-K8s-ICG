@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="ASCII"?>
+<commons:DOMLModel xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:commons="http://www.piacere-project.eu/doml/commons" xmlns:infra="http://www.piacere-project.eu/doml/infrastructure" xmlns:optimization="http://www.piacere-project.eu/doml/optimization" name="posidonia" activeInfrastructure="//@concretizations.0">
+  <annotations xsi:type="commons:SProperty" key="entorno" value="pre"/>
+  <annotations xsi:type="commons:SProperty" key="proyecto" value="baleares"/>
+  <infrastructure name="abstractInfra">
+    <nodes xsi:type="infra:VirtualMachine" name="OracleDB" os="ami-02a6bfdcf8224bd77" storage="20" credentials="//@infrastructure/@credentials.3">
+      <ifaces name="db1" belongsTo="//@infrastructure/@networks.0/@subnets.0"/>
+      <ifaces name="db2" belongsTo="//@infrastructure/@networks.0/@subnets.1"/>
+      <ifaces name="db3" belongsTo="//@infrastructure/@networks.0/@subnets.2"/>
+    </nodes>
+    <nodes xsi:type="infra:AutoScalingGroup" name="gestaut_asg" deploymentNetwork="//@infrastructure/@networks.0">
+      <machineDefinition name="gestaut_vm" os="ami-02a6bfdcf8224bd77" credentials="//@infrastructure/@credentials.0" group="//@infrastructure/@groups.0">
+        <ifaces name="db1" belongsTo="//@infrastructure/@networks.0/@subnets.0"/>
+        <ifaces name="db2" belongsTo="//@infrastructure/@networks.0/@subnets.1"/>
+        <ifaces name="db3" belongsTo="//@infrastructure/@networks.0/@subnets.2"/>
+      </machineDefinition>
+    </nodes>
+    <nodes xsi:type="infra:AutoScalingGroup" name="elasticsearch_asg" deploymentNetwork="//@infrastructure/@networks.0">
+      <machineDefinition name="elasticsearch_vm" os="ami-02a6bfdcf8224bd77" credentials="//@infrastructure/@credentials.1" group="//@infrastructure/@groups.0">
+        <ifaces name="db1" belongsTo="//@infrastructure/@networks.0/@subnets.0"/>
+        <ifaces name="db2" belongsTo="//@infrastructure/@networks.0/@subnets.1"/>
+        <ifaces name="db3" belongsTo="//@infrastructure/@networks.0/@subnets.2"/>
+      </machineDefinition>
+    </nodes>
+    <nodes xsi:type="infra:AutoScalingGroup" name="edi_asg" deploymentNetwork="//@infrastructure/@networks.0">
+      <machineDefinition name="edi_vm" os="ami-02a6bfdcf8224bd77" credentials="//@infrastructure/@credentials.2" group="//@infrastructure/@groups.0">
+        <ifaces name="db1" belongsTo="//@infrastructure/@networks.0/@subnets.0"/>
+        <ifaces name="db2" belongsTo="//@infrastructure/@networks.0/@subnets.1"/>
+        <ifaces name="db3" belongsTo="//@infrastructure/@networks.0/@subnets.2"/>
+      </machineDefinition>
+    </nodes>
+    <networks name="vpc" protocol="tcp/ip" addressRange="10.100.0.0/16">
+      <igws name="internet"/>
+      <subnets name="subnet1" protocol="tcp/ip" addressRange="10.100.1.0/24" connectedIfaces="//@infrastructure/@nodes.0/@ifaces.0 //@infrastructure/@nodes.1/@machineDefinition/@ifaces.0 //@infrastructure/@nodes.2/@machineDefinition/@ifaces.0 //@infrastructure/@nodes.3/@machineDefinition/@ifaces.0"/>
+      <subnets name="subnet2" protocol="tcp/ip" addressRange="10.100.2.0/24" connectedIfaces="//@infrastructure/@nodes.0/@ifaces.1 //@infrastructure/@nodes.1/@machineDefinition/@ifaces.1 //@infrastructure/@nodes.2/@machineDefinition/@ifaces.1 //@infrastructure/@nodes.3/@machineDefinition/@ifaces.1"/>
+      <subnets name="subnet3" protocol="tcp/ip" addressRange="10.100.3.0/24" connectedIfaces="//@infrastructure/@nodes.0/@ifaces.2 //@infrastructure/@nodes.1/@machineDefinition/@ifaces.2 //@infrastructure/@nodes.2/@machineDefinition/@ifaces.2 //@infrastructure/@nodes.3/@machineDefinition/@ifaces.2"/>
+    </networks>
+    <credentials xsi:type="infra:KeyPair" name="GestautKeyName" keyfile="ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQD3F6tyPEFEzV0LX3X8BsXdMsQz1x2cEikKDEY0aIj41qgxMCP/iteneqXSIFZBp5vizPvaoIR3Um9xK7PGoW8giupGn+EPuxIA4cDM4vzOqOkiMPhz5XK0whEjkVzTo4+S0puvDZuwIsdiW9mxhJc7tgBNL0cYlWSYVkz4G/fslNfRPW5mYAM49f4fhtxPb5ok4Q2Lg9dPKVHO/Bgeu5woMc7RY0p1ej6D4CKFE6lymSDJpW0YHX/wqE9+cfEauh7xZcG0q9t2ta6F6fmX0agvpFyZo8aFbXeUBr7osSCJNgvavWbM/06niWrOvYX2xwWdhXmXSrbX8ZbabVohBK41 email@example.com" algorithm="RSA" bits="4096"/>
+    <credentials xsi:type="infra:KeyPair" name="ESKeyName" keyfile="ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQD3F6tyPEFEzV0LX3X8BsXdMsQz1x2cEikKDEY0aIj41qgxMCP/iteneqXSIFZBp5vizPvaoIR3Um9xK7PGoW8giupGn+EPuxIA4cDM4vzOqOkiMPhz5XK0whEjkVzTo4+S0puvDZuwIsdiW9mxhJc7tgBNL0cYlWSYVkz4G/fslNfRPW5mYAM49f4fhtxPb5ok4Q2Lg9dPKVHO/Bgeu5woMc7RY0p1ej6D4CKFE6lymSDJpW0YHX/wqE9+cfEauh7xZcG0q9t2ta6F6fmX0agvpFyZo8aFbXeUBr7osSCJNgvavWbM/06niWrOvYX2xwWdhXmXSrbX8ZbabVohBK41 email@example.com" algorithm="RSA" bits="4096"/>
+    <credentials xsi:type="infra:KeyPair" name="EdiKeyName" keyfile="ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQD3F6tyPEFEzV0LX3X8BsXdMsQz1x2cEikKDEY0aIj41qgxMCP/iteneqXSIFZBp5vizPvaoIR3Um9xK7PGoW8giupGn+EPuxIA4cDM4vzOqOkiMPhz5XK0whEjkVzTo4+S0puvDZuwIsdiW9mxhJc7tgBNL0cYlWSYVkz4G/fslNfRPW5mYAM49f4fhtxPb5ok4Q2Lg9dPKVHO/Bgeu5woMc7RY0p1ej6D4CKFE6lymSDJpW0YHX/wqE9+cfEauh7xZcG0q9t2ta6F6fmX0agvpFyZo8aFbXeUBr7osSCJNgvavWbM/06niWrOvYX2xwWdhXmXSrbX8ZbabVohBK41 email@example.com" algorithm="RSA" bits="4096"/>
+    <credentials xsi:type="infra:UserPass" name="dbCredentials" username="balearesadm" password="balearesadm"/>
+    <groups xsi:type="infra:SecurityGroup" name="sg" groupedNodes="//@infrastructure/@nodes.1/@machineDefinition //@infrastructure/@nodes.2/@machineDefinition //@infrastructure/@nodes.3/@machineDefinition">
+      <rules name="salida" protocol="-1" fromPort="0" toPort="0">
+        <cidr>0.0.0.0/0</cidr>
+      </rules>
+      <rules name="lb" kind="INGRESS" protocol="tcp" fromPort="80" toPort="80">
+        <cidr>10.100.1.0/24</cidr>
+        <cidr>10.100.2.0/24</cidr>
+        <cidr>10.100.3.0/24</cidr>
+      </rules>
+      <rules name="es" kind="INGRESS" protocol="tcp" fromPort="9200" toPort="9200">
+        <cidr>10.100.1.0/24</cidr>
+        <cidr>10.100.2.0/24</cidr>
+        <cidr>10.100.3.0/24</cidr>
+      </rules>
+      <rules name="monitor" kind="INGRESS" protocol="tcp" fromPort="6556" toPort="6556">
+        <cidr>54.217.119.81/32</cidr>
+      </rules>
+      <rules name="ftp" kind="INGRESS" protocol="tcp" fromPort="22" toPort="22">
+        <cidr>213.96.27.139/32</cidr>
+        <cidr>37.187.173.88/32</cidr>
+        <cidr>51.89.40.59/32</cidr>
+        <cidr>195.53.242.200/32</cidr>
+      </rules>
+    </groups>
+    <groups xsi:type="infra:SecurityGroup" name="dbsg">
+      <rules name="salida" protocol="-1" fromPort="0" toPort="0">
+        <cidr>0.0.0.0/0</cidr>
+      </rules>
+      <rules name="ora" kind="INGRESS" protocol="tcp" fromPort="1521" toPort="1521">
+        <cidr>10.100.1.0/24</cidr>
+        <cidr>10.100.2.0/24</cidr>
+        <cidr>10.100.3.0/24</cidr>
+        <cidr>84.124.78.66/32</cidr>
+      </rules>
+    </groups>
+    <groups xsi:type="infra:SecurityGroup" name="elbsg">
+      <rules name="salida" protocol="-1" fromPort="0" toPort="0">
+        <cidr>0.0.0.0/0</cidr>
+      </rules>
+      <rules name="http" kind="INGRESS" protocol="tcp" fromPort="80" toPort="80">
+        <cidr>0.0.0.0/0</cidr>
+        <cidr>::/0</cidr>
+      </rules>
+      <rules name="https" kind="INGRESS" protocol="tcp" fromPort="443" toPort="443">
+        <cidr>0.0.0.0/0</cidr>
+        <cidr>::/0</cidr>
+      </rules>
+      <rules name="es" kind="INGRESS" protocol="tcp" fromPort="9200" toPort="9200">
+        <cidr>10.100.1.0/24</cidr>
+        <cidr>10.100.2.0/24</cidr>
+        <cidr>10.100.3.0/24</cidr>
+      </rules>
+    </groups>
+    <groups xsi:type="infra:SecurityGroup" name="checkmk">
+      <rules name="salida" protocol="-1" fromPort="0" toPort="0">
+        <cidr>0.0.0.0/0</cidr>
+      </rules>
+      <rules name="http" kind="INGRESS" protocol="tcp" fromPort="80" toPort="80">
+        <cidr>84.124.78.66/32</cidr>
+      </rules>
+      <rules name="https" kind="INGRESS" protocol="tcp" fromPort="443" toPort="443">
+        <cidr>84.124.78.66/32</cidr>
+      </rules>
+      <rules name="ftp" kind="INGRESS" protocol="tcp" fromPort="22" toPort="22">
+        <cidr>84.124.78.66/32</cidr>
+      </rules>
+    </groups>
+  </infrastructure>
+  <concretizations name="dev">
+    <providers name="aws">
+      <vms name="concrete_oracle_db" maps="//@infrastructure/@nodes.0">
+        <annotations xsi:type="commons:SProperty" key="instance_type" value="t2.micro"/>
+      </vms>
+      <vms name="concrete_gestaut_vm" maps="//@infrastructure/@nodes.1/@machineDefinition">
+        <annotations xsi:type="commons:SProperty" key="instance_type" value="t2.micro"/>
+      </vms>
+      <vms name="elasticsearch_vm" maps="//@infrastructure/@nodes.2/@machineDefinition">
+        <annotations xsi:type="commons:SProperty" key="instance_type" value="t2.micro"/>
+      </vms>
+      <vms name="edi_vm" maps="//@infrastructure/@nodes.3/@machineDefinition"/>
+      <networks name="concrete_vpc" maps="//@infrastructure/@networks.0">
+        <annotations xsi:type="commons:SProperty" key="instance_type" value="t2.micro"/>
+      </networks>
+    </providers>
+  </concretizations>
+  <optimization name="opt">
+    <objectives xsi:type="optimization:MeasurableObjective" kind="min" property="cost"/>
+    <objectives xsi:type="optimization:MeasurableObjective" kind="max" property="availability"/>
+    <nonfunctionalRequirements xsi:type="commons:RangedRequirement" name="req1" description="Cost &lt;= 70.0" property="cost" max="70.0"/>
+    <nonfunctionalRequirements xsi:type="commons:RangedRequirement" name="req2" description="Availability >= 66.5%" property="availability" min="66.5"/>
+  </optimization>
+</commons:DOMLModel>

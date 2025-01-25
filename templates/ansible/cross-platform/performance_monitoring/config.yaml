@@ -1,0 +1,12 @@
+---
+input:
+  - INFLUXDB_BUCKET
+  - INFLUXDB_TOKEN
+  - INFLUXDB_ORG
+  - INFLUXDB_ADDR
+  - DEPLOYMENT_ID
+  # - instance_ip_vm1
+  # - instance_server_private_key_user1
+output: []
+engine: ansible
+...

@@ -1,0 +1,23 @@
+telegraf_agent_package_state: latest
+
+telegraf_agent_output:
+  - type: influxdb_v2
+    config:
+      - urls = ["{{ pma_influxdb_addr }}"]
+      - token = "{{ pma_influxdb_token }}"
+      - organization = "{{ pma_influxdb_org }}"
+      - bucket = "{{ pma_influxdb_bucket }}"
+      - insecure_skip_verify = true
+
+telegraf_global_tags:
+  - tag_name: deployment_id
+    tag_value: "{{ pma_deployment_id }}"
+
+telegraf_plugins_default:
+  - plugin: cpu
+  - plugin: mem
+  - plugin: processes
+  - plugin: disk
+  - plugin: net
+  
+  

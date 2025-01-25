@@ -1,0 +1,240 @@
+<?xml version="1.0" encoding="ASCII"?>
+<commons:DOMLModel xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:app="http://www.piacere-project.eu/doml/application" xmlns:commons="http://www.piacere-project.eu/doml/commons" xmlns:infra="http://www.piacere-project.eu/doml/infrastructure" xmlns:opt="http://www.piacere-project.eu/doml/optimization" name="uc3_openstack" activeConfiguration="//@configurations.0" activeInfrastructure="//@concretizations.0">
+  <application name="app">
+    <components xsi:type="app:SoftwareComponent" name="iwg">
+      <exposedInterfaces name="net_info"/>
+    </components>
+    <components xsi:type="app:SoftwareComponent" name="osint" consumedInterfaces="//@application/@components.0/@exposedInterfaces.0 //@application/@components.3/@exposedInterfaces.0 //@application/@components.2/@exposedInterfaces.1">
+      <exposedInterfaces name="osint_info"/>
+    </components>
+    <components xsi:type="app:SoftwareComponent" name="ewcf" consumedInterfaces="//@application/@components.4/@exposedInterfaces.0">
+      <exposedInterfaces name="ewcf_restapi_if"/>
+      <exposedInterfaces name="ewcf_kafka_if"/>
+    </components>
+    <components xsi:type="app:SaaS" name="external_twitter">
+      <exposedInterfaces name="get_twitter" endPoint="https://twitter_api/get"/>
+    </components>
+    <components xsi:type="app:SaaS" name="external_firebase">
+      <exposedInterfaces name="get_firebase" endPoint="https://firebase_api/get"/>
+    </components>
+  </application>
+  <infrastructure name="infra">
+    <nodes xsi:type="infra:VirtualMachine" name="igw_vm" os="CentOS-7-2111" credentials="//@infrastructure/@credentials.0" sizeDescription="small-centos" configInterface="//@infrastructure/@nodes.0/@ifaces.0">
+      <annotations xsi:type="commons:BProperty" key="config_drive" value="true"/>
+      <ifaces name="igw_vm_oam" belongsTo="//@infrastructure/@networks.0/@subnets.0" associated="//@infrastructure/@securityGroups.0"/>
+      <ifaces name="igw_vm_net1" belongsTo="//@infrastructure/@networks.1/@subnets.0" associated="//@infrastructure/@securityGroups.0"/>
+      <ifaces name="igw_vm_net2" belongsTo="//@infrastructure/@networks.2/@subnets.0" associated="//@infrastructure/@securityGroups.0"/>
+    </nodes>
+    <nodes xsi:type="infra:VirtualMachine" name="osint_vm" os="CentOS-7-2111" credentials="//@infrastructure/@credentials.0" sizeDescription="small-centos" configInterface="//@infrastructure/@nodes.1/@ifaces.0">
+      <annotations xsi:type="commons:BProperty" key="config_drive" value="true"/>
+      <ifaces name="osint_vm_oam" belongsTo="//@infrastructure/@networks.0/@subnets.1" associated="//@infrastructure/@securityGroups.0"/>
+      <ifaces name="osint_vm_net1" belongsTo="//@infrastructure/@networks.1/@subnets.1" associated="//@infrastructure/@securityGroups.0"/>
+      <ifaces name="osint_vm_net3" belongsTo="//@infrastructure/@networks.3/@subnets.0" associated="//@infrastructure/@securityGroups.0"/>
+    </nodes>
+    <nodes xsi:type="infra:VirtualMachine" name="ewcf_vm" os="CentOS-7-2111" credentials="//@infrastructure/@credentials.0" sizeDescription="small-centos" configInterface="//@infrastructure/@nodes.2/@ifaces.0">
+      <annotations xsi:type="commons:BProperty" key="config_drive" value="true"/>
+      <ifaces name="ewcf_vm_oam" belongsTo="//@infrastructure/@networks.0/@subnets.2" associated="//@infrastructure/@securityGroups.0"/>
+      <ifaces name="ewcf_vm_net1" belongsTo="//@infrastructure/@networks.1/@subnets.2" associated="//@infrastructure/@securityGroups.0"/>
+      <ifaces name="ewcf_vm_net3" belongsTo="//@infrastructure/@networks.3/@subnets.1" associated="//@infrastructure/@securityGroups.0"/>
+    </nodes>
+    <generators xsi:type="infra:ContainerImage" name="test_consumer_4_kafka_img" uri="optima-piacere-docker-dev.artifact.tecnalia.com/wp7/ericsson/piacere/piacere/test-consumer_4_kafka:latest" kind="IMAGE" generatedContainers="//@infrastructure/@groups.0/@services.3"/>
+    <generators xsi:type="infra:ContainerImage" name="test_producer_4_kafka_img" uri="optima-piacere-docker-dev.artifact.tecnalia.com/wp7/ericsson/piacere/piacere/test-producer_4_kafka:latest" kind="IMAGE" generatedContainers="//@infrastructure/@groups.0/@services.4"/>
+    <generators xsi:type="infra:ContainerImage" name="cont_zookeeper_img" uri="optima-piacere-docker-dev.artifact.tecnalia.com/wp7/ericsson/piacere/piacere/wurstmeister/zookeeper:latest" kind="IMAGE" generatedContainers="//@infrastructure/@groups.0/@services.2"/>
+    <generators xsi:type="infra:ContainerImage" name="cont_kafka_img" uri="optima-piacere-docker-dev.artifact.tecnalia.com/wp7/ericsson/piacere/piacere/wurstmeister/kafka:latest" kind="IMAGE" generatedContainers="//@infrastructure/@groups.0/@services.1"/>
+    <generators xsi:type="infra:ContainerImage" name="go_poster_img" uri="optima-piacere-docker-dev.artifact.tecnalia.com/wp7/ericsson/go_poster:latest" kind="IMAGE" generatedContainers="//@infrastructure/@groups.0/@services.6"/>
+    <generators xsi:type="infra:ContainerImage" name="ewcf_rest_img" uri="optima-piacere-docker-dev.artifact.tecnalia.com/wp7/ericsson/restapi:latest" kind="IMAGE" generatedContainers="//@infrastructure/@groups.0/@services.9"/>
+    <generators xsi:type="infra:ContainerImage" name="hello_mongo_img" uri="optima-piacere-docker-dev.artifact.tecnalia.com/wp7/ericsson/hello-mongo:latest" kind="IMAGE" generatedContainers="//@infrastructure/@groups.0/@services.7"/>
+    <generators xsi:type="infra:ContainerImage" name="node_img" uri="optima-piacere-docker-dev.artifact.tecnalia.com/wp7/ericsson/node:18.12.1" kind="IMAGE" generatedContainers="//@infrastructure/@groups.0/@services.8"/>
+    <generators xsi:type="infra:ContainerImage" name="golang_img" uri="optima-piacere-docker-dev.artifact.tecnalia.com/wp7/ericsson/golang:1.16-alpine" kind="IMAGE" generatedContainers="//@infrastructure/@groups.0/@services.5"/>
+    <generators xsi:type="infra:ContainerImage" name="mongodb_img" uri="optima-piacere-docker-dev.artifact.tecnalia.com/wp7/ericsson/mongo:4.2" kind="IMAGE" generatedContainers="//@infrastructure/@groups.2/@services.3"/>
+    <generators xsi:type="infra:ContainerImage" name="tis_img" uri="optima-piacere-docker-dev.artifact.tecnalia.com/wp7/ericsson/tis:1.0" kind="IMAGE" generatedContainers="//@infrastructure/@groups.1/@services.0"/>
+    <generators xsi:type="infra:ContainerImage" name="tia_img" uri="optima-piacere-docker-dev.artifact.tecnalia.com/wp7/ericsson/tia:1.0" kind="IMAGE" generatedContainers="//@infrastructure/@groups.1/@services.1"/>
+    <generators xsi:type="infra:ContainerImage" name="twr_img" uri="optima-piacere-docker-dev.artifact.tecnalia.com/wp7/ericsson/twr:1.0" kind="IMAGE" generatedContainers="//@infrastructure/@groups.1/@services.2"/>
+    <generators xsi:type="infra:ContainerImage" name="python_img" uri="optima-piacere-docker-dev.artifact.tecnalia.com/wp7/ericsson/python:3.7" kind="IMAGE" generatedContainers="//@infrastructure/@groups.0/@services.0"/>
+    <generators xsi:type="infra:ContainerImage" name="ivre_web_img" uri="optima-piacere-docker-dev.artifact.tecnalia.com/wp7/ericsson/ivre/web:latest" kind="IMAGE" generatedContainers="//@infrastructure/@groups.2/@services.0"/>
+    <generators xsi:type="infra:ContainerImage" name="ivre_db_img" uri="optima-piacere-docker-dev.artifact.tecnalia.com/wp7/ericsson/ivre/db:latest" kind="IMAGE" generatedContainers="//@infrastructure/@groups.2/@services.1"/>
+    <generators xsi:type="infra:ContainerImage" name="ivre_client_img" uri="optima-piacere-docker-dev.artifact.tecnalia.com/wp7/ericsson/ivre/client:latest" kind="IMAGE" generatedContainers="//@infrastructure/@groups.2/@services.2"/>
+    <storages name="ext_sto_1" label="vm_storage" size_gb="512"/>
+    <storages name="ext_sto_2" label="vm_storage" size_gb="512"/>
+    <credentials xsi:type="commons:KeyPair" name="ssh_key" user="ubuntu" key="/home/ubuntu/.ssh/ssh_key_aws.pub" algorithm="RSA" bits="4096"/>
+    <groups xsi:type="infra:ContainerGroup" name="ewcf_cont_group">
+      <services name="cont_python" generatedFrom="//@infrastructure/@generators.13">
+        <hostConfigs host="//@infrastructure/@nodes.2"/>
+      </services>
+      <services name="cont_kafka" generatedFrom="//@infrastructure/@generators.3" networks="//@infrastructure/@groups.0/@networks.0">
+        <hostConfigs host="//@infrastructure/@nodes.2">
+          <environment_variables key="KAFKA_ADVERTISED_HOST_NAME" value="kafka"/>
+          <environment_variables key="KAFKA_CREATE_TOPICS" value="stats:1:1"/>
+          <environment_variables key="KAFKA_AUTO_CREATE_TOPICS_ENABLE" value="true"/>
+          <environment_variables key="KAFKA_ZOOKEEPER_CONNECT" value="zookeeper:2181"/>
+          <configurations container_port="9092" vm_port="9092" iface="//@infrastructure/@nodes.2/@ifaces.0"/>
+        </hostConfigs>
+      </services>
+      <services name="cont_zookeeper" generatedFrom="//@infrastructure/@generators.2" networks="//@infrastructure/@groups.0/@networks.0">
+        <hostConfigs host="//@infrastructure/@nodes.2">
+          <configurations container_port="2181" vm_port="2181" iface="//@infrastructure/@nodes.2/@ifaces.0"/>
+        </hostConfigs>
+      </services>
+      <services name="cont_test_consumer_4_kafka" generatedFrom="//@infrastructure/@generators.0" networks="//@infrastructure/@groups.0/@networks.0" dependsOn="//@infrastructure/@groups.0/@services.0 //@infrastructure/@groups.0/@services.1 //@infrastructure/@groups.0/@services.2">
+        <hostConfigs host="//@infrastructure/@nodes.2">
+          <configurations container_port="5012" vm_port="5013" iface="//@infrastructure/@nodes.2/@ifaces.0"/>
+        </hostConfigs>
+      </services>
+      <services name="cont_test_producer_4_kafka" generatedFrom="//@infrastructure/@generators.1" networks="//@infrastructure/@groups.0/@networks.0" dependsOn="//@infrastructure/@groups.0/@services.0">
+        <hostConfigs host="//@infrastructure/@nodes.2">
+          <configurations container_port="5014" vm_port="5015" iface="//@infrastructure/@nodes.2/@ifaces.0"/>
+        </hostConfigs>
+      </services>
+      <services name="cont_golang" generatedFrom="//@infrastructure/@generators.8">
+        <hostConfigs host="//@infrastructure/@nodes.2"/>
+      </services>
+      <services name="cont_go_poster" generatedFrom="//@infrastructure/@generators.4" dependsOn="//@infrastructure/@groups.0/@services.5">
+        <hostConfigs host="//@infrastructure/@nodes.2">
+          <configurations container_port="5009" vm_port="5008" iface="//@infrastructure/@nodes.2/@ifaces.0"/>
+        </hostConfigs>
+      </services>
+      <services name="cont_hello_mongo" generatedFrom="//@infrastructure/@generators.6">
+        <hostConfigs host="//@infrastructure/@nodes.2">
+          <configurations container_port="5003" vm_port="5002" iface="//@infrastructure/@nodes.2/@ifaces.0"/>
+        </hostConfigs>
+      </services>
+      <services name="cont_node" generatedFrom="//@infrastructure/@generators.7">
+        <hostConfigs host="//@infrastructure/@nodes.2">
+          <configurations container_port="5005" vm_port="5004" iface="//@infrastructure/@nodes.2/@ifaces.0"/>
+        </hostConfigs>
+      </services>
+      <services name="cont_ewcf_rest" generatedFrom="//@infrastructure/@generators.5" dependsOn="//@infrastructure/@groups.0/@services.7 //@infrastructure/@groups.0/@services.8">
+        <hostConfigs host="//@infrastructure/@nodes.2">
+          <configurations container_port="5007" vm_port="5006" iface="//@infrastructure/@nodes.2/@ifaces.1"/>
+        </hostConfigs>
+      </services>
+      <networks name="kafka_net" containerNetworkName="kafka_net"/>
+    </groups>
+    <groups xsi:type="infra:ContainerGroup" name="osint_cont_group">
+      <services name="cont_tis" generatedFrom="//@infrastructure/@generators.10">
+        <hostConfigs host="//@infrastructure/@nodes.2">
+          <configurations container_port="90" vm_port="8090" iface="//@infrastructure/@nodes.1/@ifaces.0"/>
+        </hostConfigs>
+      </services>
+      <services name="cont_tia" generatedFrom="//@infrastructure/@generators.11">
+        <hostConfigs host="//@infrastructure/@nodes.2">
+          <configurations container_port="91" vm_port="8091" iface="//@infrastructure/@nodes.1/@ifaces.0"/>
+        </hostConfigs>
+      </services>
+      <services name="cont_twr" generatedFrom="//@infrastructure/@generators.12">
+        <hostConfigs host="//@infrastructure/@nodes.2">
+          <configurations container_port="92" vm_port="8092" iface="//@infrastructure/@nodes.1/@ifaces.0"/>
+        </hostConfigs>
+      </services>
+    </groups>
+    <groups xsi:type="infra:ContainerGroup" name="igw_cont_group">
+      <services name="cont_ivre_web" generatedFrom="//@infrastructure/@generators.14">
+        <hostConfigs host="//@infrastructure/@nodes.0">
+          <configurations container_port="85" vm_port="8085" iface="//@infrastructure/@nodes.0/@ifaces.0"/>
+        </hostConfigs>
+      </services>
+      <services name="cont_ivre_db" generatedFrom="//@infrastructure/@generators.15" dependsOn="//@infrastructure/@groups.2/@services.3">
+        <hostConfigs host="//@infrastructure/@nodes.0">
+          <configurations container_port="86" vm_port="8086" iface="//@infrastructure/@nodes.0/@ifaces.0"/>
+        </hostConfigs>
+      </services>
+      <services name="cont_ivre_client" generatedFrom="//@infrastructure/@generators.16">
+        <hostConfigs host="//@infrastructure/@nodes.0">
+          <configurations container_port="87" vm_port="8087" iface="//@infrastructure/@nodes.0/@ifaces.0"/>
+        </hostConfigs>
+      </services>
+      <services name="cont_mongodb" generatedFrom="//@infrastructure/@generators.9">
+        <hostConfigs host="//@infrastructure/@nodes.2">
+          <configurations container_port="85" vm_port="8085" iface="//@infrastructure/@nodes.2/@ifaces.0"/>
+        </hostConfigs>
+      </services>
+    </groups>
+    <securityGroups name="sg" ifaces="//@infrastructure/@nodes.0/@ifaces.0 //@infrastructure/@nodes.0/@ifaces.1 //@infrastructure/@nodes.0/@ifaces.2 //@infrastructure/@nodes.1/@ifaces.0 //@infrastructure/@nodes.1/@ifaces.1 //@infrastructure/@nodes.1/@ifaces.2 //@infrastructure/@nodes.2/@ifaces.0 //@infrastructure/@nodes.2/@ifaces.1 //@infrastructure/@nodes.2/@ifaces.2">
+      <rules name="icmp" protocol="ICMP" fromPort="-1" toPort="-1">
+        <cidr>0.0.0.0/0</cidr>
+      </rules>
+      <rules name="http" kind="INGRESS" protocol="TCP" fromPort="80" toPort="80">
+        <cidr>0.0.0.0/0</cidr>
+      </rules>
+      <rules name="https" kind="INGRESS" protocol="TCP" fromPort="443" toPort="443">
+        <cidr>0.0.0.0/0</cidr>
+      </rules>
+      <rules name="ssh" kind="INGRESS" protocol="TCP" fromPort="22" toPort="22">
+        <cidr>0.0.0.0/0</cidr>
+      </rules>
+    </securityGroups>
+    <networks name="oam">
+      <subnets name="subnet_oam_igw" connectedIfaces="//@infrastructure/@nodes.0/@ifaces.0"/>
+      <subnets name="subnet_oam_osint" connectedIfaces="//@infrastructure/@nodes.1/@ifaces.0"/>
+      <subnets name="subnet_oam_ewcf" connectedIfaces="//@infrastructure/@nodes.2/@ifaces.0"/>
+    </networks>
+    <networks name="net1">
+      <subnets name="subnet_net1_igw" connectedIfaces="//@infrastructure/@nodes.0/@ifaces.1" connectedTo="//@infrastructure/@networks.1/@subnets.1"/>
+      <subnets name="subnet_net1_osint" connectedIfaces="//@infrastructure/@nodes.1/@ifaces.1" connectedTo="//@infrastructure/@networks.1/@subnets.0 //@infrastructure/@networks.1/@subnets.2"/>
+      <subnets name="subnet_net1_ewcf" connectedIfaces="//@infrastructure/@nodes.2/@ifaces.1" connectedTo="//@infrastructure/@networks.1/@subnets.1"/>
+    </networks>
+    <networks name="net2">
+      <subnets name="subnet_net2_igw" connectedIfaces="//@infrastructure/@nodes.0/@ifaces.2"/>
+    </networks>
+    <networks name="net3">
+      <subnets name="subnet_net3_osint" connectedIfaces="//@infrastructure/@nodes.1/@ifaces.2"/>
+      <subnets name="subnet_net3_ewcf" connectedIfaces="//@infrastructure/@nodes.2/@ifaces.2"/>
+    </networks>
+  </infrastructure>
+  <concretizations name="con_infra">
+    <providers name="openstack">
+      <vms name="concrete_osint_vm" maps="//@infrastructure/@nodes.1"/>
+      <vms name="concrete_igw_vm" maps="//@infrastructure/@nodes.0"/>
+      <vms name="concrete_ewcf_vm" maps="//@infrastructure/@nodes.2"/>
+      <containerImages name="concrete_cont_kafka_img" maps="//@infrastructure/@generators.3"/>
+      <containerImages name="concrete_cont_zookeeper_img" maps="//@infrastructure/@generators.2"/>
+      <containerImages name="concrete_test_consumer_4_kafka_img" maps="//@infrastructure/@generators.0"/>
+      <containerImages name="concrete_test_producer_4_kafka_img" maps="//@infrastructure/@generators.1"/>
+      <containerImages name="concrete_go_poster_img" maps="//@infrastructure/@generators.4"/>
+      <containerImages name="concrete_ewct_rest_img" maps="//@infrastructure/@generators.5"/>
+      <containerImages name="concrete_hello_mondo_img" maps="//@infrastructure/@generators.6"/>
+      <containerImages name="concrete_node_img" maps="//@infrastructure/@generators.7"/>
+      <containerImages name="concrete_golang_img" maps="//@infrastructure/@generators.8"/>
+      <containerImages name="concrete_mongodb_img" maps="//@infrastructure/@generators.9"/>
+      <containerImages name="concrete_tis_img" maps="//@infrastructure/@generators.10"/>
+      <containerImages name="tia_img" maps="//@infrastructure/@generators.11"/>
+      <containerImages name="concrete_twr_img" maps="//@infrastructure/@generators.12"/>
+      <containerImages name="concrete_python_img" maps="//@infrastructure/@generators.13"/>
+      <containerImages name="concrete_ivre_web_img" maps="//@infrastructure/@generators.14"/>
+      <containerImages name="concrete_ivre_db_img" maps="//@infrastructure/@generators.15"/>
+      <containerImages name="concrete_ivre_client_img" maps="//@infrastructure/@generators.16"/>
+      <networks name="concrete_oam" resourceName="external" preexisting="true" protocol="TCP/IP" maps="//@infrastructure/@networks.0">
+        <subnets name="concrete_subnet_oam_igw" resourceName="external" preexisting="true" maps="//@infrastructure/@networks.0/@subnets.0"/>
+        <subnets name="concrete_subnet_oam_osint" resourceName="external" preexisting="true" maps="//@infrastructure/@networks.0/@subnets.1"/>
+        <subnets name="concrete_subnet_oam_ewcf" resourceName="external" preexisting="true" maps="//@infrastructure/@networks.0/@subnets.2"/>
+      </networks>
+      <networks name="concrete_net1" protocol="TCP/IP" addressRange="16.0.2.0/24" maps="//@infrastructure/@networks.1">
+        <subnets name="concrete_subnet_net1_igw" addressRange="16.0.2.0/26" maps="//@infrastructure/@networks.1/@subnets.0"/>
+        <subnets name="concrete_subnet_net1_osint" addressRange="16.0.2.64/26" maps="//@infrastructure/@networks.1/@subnets.1"/>
+        <subnets name="concrete_subnet_net1_ewcf" addressRange="16.0.2.128/26" maps="//@infrastructure/@networks.1/@subnets.2"/>
+      </networks>
+      <networks name="concrete_net2" protocol="TCP/IP" addressRange="16.0.3.0/24" maps="//@infrastructure/@networks.2">
+        <subnets name="subnet_net2_igw" addressRange="16.0.3.0/25"/>
+      </networks>
+      <networks name="concrete_net3" protocol="TCP/IP" addressRange="16.0.4.0/24" maps="//@infrastructure/@networks.3">
+        <subnets name="subnet_net3_osint" addressRange="16.0.4.0/25"/>
+        <subnets name="subnet_net3_ewcf" addressRange="16.0.4.128/25"/>
+      </networks>
+      <storages name="concrete_ext_sto_mongo1" refs="//@concretizations.0/@providers.0/@vms.1" maps="//@infrastructure/@storages.0"/>
+      <storages name="concrete_ext_sto_mongo2" refs="//@concretizations.0/@providers.0/@vms.2" maps="//@infrastructure/@storages.1"/>
+    </providers>
+  </concretizations>
+  <optimization name="opt">
+    <objectives xsi:type="opt:MeasurableObjective" kind="min" property="cost"/>
+    <objectives xsi:type="opt:MeasurableObjective" kind="max" property="performance"/>
+    <objectives xsi:type="opt:MeasurableObjective" kind="max" property="availability"/>
+    <nonfunctionalRequirements xsi:type="commons:RangedRequirement" name="req1" description="cost &lt;= 600" property="cost" max="600.0"/>
+    <nonfunctionalRequirements xsi:type="commons:RangedRequirement" name="req2" description="performance >= 7%" property="performance" min="7.0"/>
+    <nonfunctionalRequirements name="req3" description="elements" property="VM VM VM Storage Storage"/>
+  </optimization>
+  <configurations name="config1">
+    <deployments component="//@application/@components.1" node="//@infrastructure/@nodes.1"/>
+    <deployments component="//@application/@components.0" node="//@infrastructure/@nodes.0"/>
+    <deployments component="//@application/@components.2" node="//@infrastructure/@nodes.2"/>
+  </configurations>
+</commons:DOMLModel>

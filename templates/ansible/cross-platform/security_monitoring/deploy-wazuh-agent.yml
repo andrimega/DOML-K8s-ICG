@@ -1,0 +1,146 @@
+- hosts: servers_for_security_monitoring
+  gather_facts: yes
+
+  pre_tasks:
+    - name: Check parameters
+      fail:
+        msg: 'variable {{item}} not defined'
+      when: item is not defined
+      with_items:
+        - piacere_deployment_id
+        - wazuh_manager_hostname
+        - wazuh_manager_port
+    - name: Print parameters
+      debug:
+        msg: 
+          - "piacere_deployment_id: {{ piacere_deployment_id }}"
+          - "wazuh_manager_hostname: {{ wazuh_manager_hostname }}"
+          - "wazuh_manager_port: {{ wazuh_manager_port }}"
+    - name: Ensure gnupg package
+      package:
+        name: gnupg
+        state: present
+      become: true
+  vars_files:
+    - vars.yml
+
+  tasks:
+
+  - name: System details
+    ansible.builtin.debug: msg="{{ item }}"
+    with_items: 
+      - "{{ ansible_distribution }}"
+      - "{{ ansible_distribution_version }}"
+      - "{{ ansible_distribution_major_version }}"
+
+  - name: Other distributions not supported
+    ansible.builtin.shell: echo "only on Ubuntu or Debian"
+    when: ansible_distribution != 'Debian' and ansible_distribution != 'Ubuntu'
+
+  # Setup for debian based distributions
+  - name: System upgrade
+    ansible.builtin.apt:
+      name: "*"
+      state: latest
+      update_cache: yes
+      force_apt_get: True
+      cache_valid_time: 3600
+    become: yes
+    register: apt_action
+    retries: 100
+    until: apt_action is success
+    when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+
+  - name: APT install required packages
+    become: yes
+    ansible.builtin.apt:
+      name:
+        - curl
+        - python3
+      state: present
+    when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'      
+
+  - name: Add wazuh apt repository and install wazuh-agent
+    become: yes
+    block:
+      - name: Get wazuh apt-key
+        ansible.builtin.apt_key:
+          url: https://packages.wazuh.com/key/GPG-KEY-WAZUH 
+          state: present 
+      - name: Add wazuh apt repository
+        ansible.builtin.apt_repository:
+          repo: "deb https://packages.wazuh.com/4.x/apt/ stable main"
+          state: present
+          filename: wazuh
+          update_cache: yes
+      - name: Install wazuh-agent
+        register: updatesys
+        apt:
+          name: wazuh-agent
+    when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'          
+
+  # Setup for CentOS
+  - name: Upgrade all packages
+    become: yes
+    ansible.builtin.yum:
+      name: '*'
+      state: latest
+    when: ansible_distribution == 'CentOS'
+
+  - name: Add the Wazuh repository and install wazuh agent
+    become: yes
+    block:
+      - name: Import the GPG key
+        become: yes
+        ansible.builtin.rpm_key:
+          state: present
+          key: https://packages.wazuh.com/key/GPG-KEY-WAZUH
+        when: ansible_distribution == 'CentOS'
+
+      - name: Add the repository
+        ansible.builtin.yum_repository:
+          name: wazuh
+          description: EL-\$releasever - Wazuh
+          baseurl: https://packages.wazuh.com/4.x/yum/
+          gpgcheck: true
+          gpgkey: https://packages.wazuh.com/key/GPG-KEY-WAZUH
+          enabled: true
+          protect: true
+
+      - name: Install wazuh-agent
+        ansible.builtin.yum:
+          name: wazuh-agent
+          state: latest
+    when: ansible_distribution == 'CentOS'
+
+  - name: Create config path
+    ansible.builtin.file:
+      path: "{{ service_config_dir }}"
+      state: directory
+      mode: 0755
+    when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu' or ansible_distribution == 'CentOS'
+
+  - name: Copy config template to remote host
+    become: yes
+    ansible.builtin.template:
+      src: "{{ playbook_dir }}/config/ossec.conf.j2"
+      dest: "/var/ossec/etc/ossec.conf"
+      mode: 0644
+    register: config_changed
+    when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu' or ansible_distribution == 'CentOS'
+
+  - name: Start wazuh agent service
+    become: yes
+    block:
+      - name: Make sure wazuh-agent service is enabled and not masked
+        ansible.builtin.systemd:
+          daemon_reload: yes
+          name: wazuh-agent
+          enabled: yes
+          masked: no
+      - name: Start the service
+        ansible.builtin.systemd:
+          name: wazuh-agent
+          state: started
+    when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu' or ansible_distribution == 'CentOS'
+

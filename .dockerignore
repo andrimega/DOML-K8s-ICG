@@ -1,0 +1,5 @@
+.idea
+*.tar.gz
+icgparser/doml/*domlx
+output_files_example/*
+output_files_*

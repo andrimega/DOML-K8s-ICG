@@ -1,0 +1,8 @@
+roles:
+#  - name: dj-wasabi.telegraf
+#    version: 0.13.3
+#    source: https://galaxy.ansible.com
+  - name: dj-wasabi.telegraf
+    src: https://github.com/dj-wasabi/ansible-telegraf.git
+    scm: git
+    version: 0.13.3

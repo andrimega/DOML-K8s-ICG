@@ -1,0 +1,10 @@
+---
+input:
+  - DEPLOYMENT_ID
+  - WAZUH_MANAGER_HOST
+  - WAZUH_MANAGER_PORT
+  # - instance_ip_vm1
+  # - instance_server_private_key_user1
+output: []
+engine: ansible
+...
