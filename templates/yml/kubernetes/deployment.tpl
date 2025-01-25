@@ -4,6 +4,7 @@ metadata:
   name: {{component.name}}-deployment
   labels:
     app: {{component.name}}
+  namespace: {{namespace}}
 spec:
   replicas: {{replicas}}
   selector:
@@ -27,6 +28,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: {{component.name}}-service-lb
+  namespace: {{namespace}}
 spec:
   type: LoadBalancer
   selector:
@@ -43,6 +45,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: {{component.name}}-service-ip
+  namespace: {{namespace}}
 spec:
   selector:
     app: {{component.name}}
@@ -52,24 +55,25 @@ spec:
     port: {{port.externalPort}}
     targetPort: {{port.containerPort}}
   {% endif %}{% endfor %}{% endif %}
-{% if scaleOn %}---
+{% if autoscaler %}---
 
 apiVersion: autoscaling/v1
 kind: HorizontalPodAutoscaler
 metadata:
- name: {{component.name}}-deployment
+  name: {{component.name}}-hpa
+  namespace: {{namespace}}
 spec:
  scaleTargetRef:
-   apiVersion: apps/v1
-   kind: Deployment
-   name: {{component.name}}-deployment
- minReplicas: {{minSize}}
- maxReplicas: {{maxSize}}
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{component.name}}-deployment
+ minReplicas: {{autoscaler.minSize}}
+ maxReplicas: {{autoscaler.maxSize}}
 metrics:
 - type: Resource
   resource:
-    name: {{scaleOn}}
+    name: {{autoscaler.metric}}
     target:
-      type: Utilization
-      averageUtilization: {{scaleTarget}}
+      type: {{autoscaler.metricType}}
+      averageUtilization: {{autoscaler.threshold}}
 {% endif %}

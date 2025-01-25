@@ -1,6 +1,7 @@
 # ICG Controller
 
-This repository contains all the required code and templates to run the ICG component, it also contains a Dockerfile that builds the complete image of the ICG with a provided REST API
+This repository contains all the required code and templates to run the ICG component, it also contains a Dockerfile that builds the complete image of the ICG with a provided REST API.
+The repository is a fork of the official PIACERE ICG repo from technalia.
 
 Requirements
 -------------
