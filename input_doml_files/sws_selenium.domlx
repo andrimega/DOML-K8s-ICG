@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="ASCII"?>
+<commons:DOMLModel xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:app="http://www.piacere-project.eu/doml/application" xmlns:commons="http://www.piacere-project.eu/doml/commons" xmlns:infra="http://www.piacere-project.eu/doml/infrastructure" xmlns:opt="http://www.piacere-project.eu/doml/optimization" name="validation_sws_selenium" version="3.1" activeConfiguration="//@configurations.0" activeInfrastructure="//@concretizations.0">
+  <application name="sws_selenium_app">
+    <components xsi:type="app:SoftwareComponent" name="sws">
+      <exposedInterfaces name="httpPort"/>
+    </components>
+    <components xsi:type="app:SoftwareComponent" name="selenium-hub" consumedInterfaces="//@application/@components.0/@exposedInterfaces.0">
+      <exposedInterfaces name="hubEndpoint"/>  
+    </components>
+    <components xsi:type="app:SoftwareComponent" name="selenium-nodes" consumedInterfaces="//@application/@components.1/@exposedInterfaces.0"/>
+    <components xsi:type="app:SoftwareComponent" name="selenium-grid-metric-exporter" consumedInterfaces="//@application/@components.1/@exposedInterfaces.0">
+      <exposedInterfaces name="metricEndpoint"/>
+    </components>
+    <components xsi:type="app:SoftwareComponent" name="selenium-grid-scaler" consumedInterfaces="//@application/@components.3/@exposedInterfaces.0"/>
+  </application>
+  <infrastructure name="sws_selenium_infra">
+    <securityGroups name="sg">
+      <rules name="icmp" protocol="ICMP" fromPort="-1" toPort="-1">
+        <cidr>0.0.0.0/0</cidr>
+      </rules>
+      <rules name="ssh" kind="INGRESS" protocol="TCP" fromPort="22" toPort="22">
+        <cidr>0.0.0.0/0</cidr>
+      </rules>
+      <rules name="http" kind="INGRESS" protocol="TCP" fromPort="80" toPort="80">
+        <cidr>0.0.0.0/0</cidr>
+      </rules>
+      <rules name="https" kind="INGRESS" protocol="TCP" fromPort="443" toPort="443">
+        <cidr>0.0.0.0/0</cidr>
+      </rules>
+    </securityGroups>
+    <networks name="common_network" protocol="TCP/IP">
+    </networks>
+    <k8s name="Cluster_main" publicAccess="true" clusterSecurityGroup='//@infrastructure/@securityGroups.0' deploymentNetwork="//@infrastructure/@networks.0"> 
+      <nodeGroup name="main_group" minSize="1" maxSize="2" desiredSize="2" type="t3.medium"/>
+      <nodeGroup name="second_group" minSize="2" maxSize="4" desiredSize="2" type="t3.medium"/>
+    </k8s>
+    <DeploymentImage name="webserver" url="andreathesis/sws">
+        <exposedPort name="http" containerPort="80" externalPort="80" public="true"/>
+    </DeploymentImage>
+    <KubernetesAutoScaler name="sws-hpa" metric="cpu" metricType="Utilization" threshold="50" minSize="2" maxSize="5"/>
+
+    <DeploymentImage name="selenium-hub" url="selenium/hub:4.1.0">
+        <exposedPort name="port1" containerPort="4442" externalPort="4442" public="true"/>
+        <exposedPort name="port2" containerPort="4443" externalPort="4443" public="true"/>
+        <exposedPort name="port3" containerPort="4444" externalPort="4444" public="true"/>
+    </DeploymentImage>
+    <DeploymentImage name="selenium-node" url="selenium/node-chrome:4.1.0"/>
+    <DeploymentImage name="metric-exporter" url="andreathesis/queue-size-exporter">
+        <exposedPort name="http" containerPort="8080" externalPort="8080" public="false"/>
+    </DeploymentImage>
+  </infrastructure>
+  <concretizations name="sws_selenium_concrete">
+    <providers name="aws">
+      <networks name="concrete_vpc" maps="//@infrastructure/@networks.0">
+      </networks>
+      <k8s name="Cluster_main" maps="//@infrastructure/@k8s.0"/>
+    </providers>
+  </concretizations>
+  <configurations name="sws_selenium_config">
+    <KubernetesDeployments name="sws"  replicas="2" image="//@infrastructure/@DeploymentImage.0" cluster="//@infrastructure/@k8s.0"  component="//@application/@components.0" autoscaler="//@infrastructure/@KubernetesAutoScaler.0"/>
+
+    <KubernetesDeployments name="selenium-hub" replicas="1" namespace="selenium" image="//@infrastructure/@DeploymentImage.1" cluster="//@infrastructure/@k8s.0"  component="//@application/@components.1"/>
+    <KubernetesDeployments name="selenium-node" replicas="2" namespace="selenium" image="//@infrastructure/@DeploymentImage.2" cluster="//@infrastructure/@k8s.0"  component="//@application/@components.2"/>
+    
+    <ExternalKubernetesDeployments name="prometheus-namespace" url="https://github.com/andrimega/DOML-EKS-validation-local/tree/main/Selenium/kube/scaler/prometheus/namespace.yaml" cluster="//@infrastructure/@k8s.0"  component="//@application/@components.4"/>
+    <ExternalKubernetesDeployments name="prometheus-config" url="https://github.com/andrimega/DOML-EKS-validation-local/tree/main/Selenium/kube/scaler/prometheus/config.yaml" cluster="//@infrastructure/@k8s.0"  component="//@application/@components.4"/>
+    <ExternalKubernetesDeployments name="prometheus-server" url="https://github.com/andrimega/DOML-EKS-validation-local/tree/main/Selenium/kube/scaler/prometheus/prometheus-server.yaml" cluster="//@infrastructure/@k8s.0"  component="//@application/@components.4"/>
+    <ExternalKubernetesDeployments name="prometheus-operators" url="https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/main/bundle.yaml" cluster="//@infrastructure/@k8s.0"  component="//@application/@components.4"/>
+    <ExternalKubernetesDeployments name="prometheus-monitor" url="https://github.com/andrimega/DOML-EKS-validation-local/tree/main/Selenium/kube/scaler/monitor.yaml" cluster="//@infrastructure/@k8s.0"  component="//@application/@components.4"/>
+    <KubernetesDeployments name="exporter" replicas="1" namespace="selenium" image="//@infrastructure/@DeploymentImage.3" cluster="//@infrastructure/@k8s.0"  component="//@application/@components.3"/>
+    <ExternalKubernetesDeployments name="keda-CRD" url="https://github.com/kedacore/keda/releases/download/v2.13.0/keda-2.13.0.yaml" cluster="//@infrastructure/@k8s.0"  component="//@application/@components.4"/>
+    <ExternalKubernetesDeployments name="keda-scaler" url="https://github.com/andrimega/DOML-EKS-validation-local/blob/main/Selenium/kube/scaler/keda-scaler.yaml" cluster="//@infrastructure/@k8s.0"  component="//@application/@components.4"/>
+    
+
+  </configurations>
+</commons:DOMLModel>
