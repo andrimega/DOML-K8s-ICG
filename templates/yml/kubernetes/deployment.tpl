@@ -21,11 +21,11 @@ spec:
         {% if image.ports %}ports:
         {% for port in image.ports %}- containerPort: {{port.containerPort}}
           name: {{port.name}}
-        {% endfor %}{% endif %}resources:
+        {% endfor %}{% endif %}{% if autoscaler%}resources:
           requests:
             cpu: 100m
           limits:
-            cpu: 200m
+            cpu: 200m {% endif %}
 {% if image.ports|selectattr("public") | list | length %}---
 
 apiVersion: v1
