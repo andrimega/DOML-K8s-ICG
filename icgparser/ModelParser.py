@@ -127,6 +127,40 @@ def parse_infrastructural_objects(doml_model):
     return infra_object_step
 
 def parse_k8s_deployment(deployment, infra_object_step):
+    # prepare ds
+    application_object_step = {"programming_language": "kubernetes", "data": {}}
+    # extract component name
+    application_resource = deployment.eGet("component")
+    deployment_component_name = application_resource.eGet("name")
+    logging.info(f'Parsing kubernetes deployment for component {deployment_component_name}')
+    object_representation = {}
+
+    # assign name
+    object_representation['name'] = deployment_component_name
+    # extract and assign image and ports
+    image = deployment.eGet("image")
+    ports = image.eGet("exposedPort")
+    port_list = []
+    for port in list(ports):
+         port_list.append(DomlParserUtilities.save_attributes(port,{}))
+    object_representation['image'] = DomlParserUtilities.save_attributes(image, {})
+    object_representation['image']['ports'] = port_list
+    
+    # extract and assign replicas and namespace
+    object_representation['replicas'] = deployment.eGet('replicas')
+    object_representation['namespace'] = deployment.eGet('namespace')
+
+    # extract and assign autoscaler
+    object_representation['autoscaler'] = DomlParserUtilities.save_attributes(deployment.eGet("autoscaler"), {})
+
+    # fill ds
+    application_object_step["data"] = {"KubernetesDeployment" : object_representation}
+    application_object_step["step_name"] = deployment_component_name
+    application_object_step["step_type"] = "component"
+
+    return application_object_step
+
+def parse_k8s_ext_deployment(deployment, infra_object_step):
     application_object_step = {"programming_language": "kubernetes", "data": {}}
     deployment_component_name = "prova_depl"# deployment.component.name
     deployment_component_type = "appl_type" #deployment.component.eClass.name
@@ -134,35 +168,14 @@ def parse_k8s_deployment(deployment, infra_object_step):
     object_representation = {}
 
     application_resource = deployment.eGet("component")
-    image = deployment.eGet("image")
-    ports = image.eGet("exposedPort")
-
-    # if not cluster or not image: raise Exception()
-    # object_representation['component'] = application_resource
-    # if "DeploymentImage" in infra_object_step.get("data").keys():
-    #     for deplimg in infra_object_step.get("data").get("autoScalingGroups"):
-    #         if deplimg.get("name") == image.name:
-    #             object_representation["image"] = [deplimg]
-    
     object_representation['component'] = DomlParserUtilities.save_attributes(application_resource, {})
-    
-    object_representation['image'] = DomlParserUtilities.save_attributes(image, {})
-    port_list = []
-    for port in list(ports):
-         port_list.append(DomlParserUtilities.save_attributes(port,{}))
-    object_representation['image']['ports'] = port_list
-    object_representation['replicas'] = deployment.eGet("replicas")
-    object_representation['scaleTarget'] = deployment.eGet("scaleTarget")
-    object_representation['scaleOn'] = deployment.eGet("scaleOn")
-    object_representation['minSize'] = deployment.eGet("minSize")
-    object_representation['maxSize'] = deployment.eGet("maxSize")
+    object_representation['url'] = deployment.eGet("url")
 
     application_object_step["data"] = {"KubernetesDeployment" : object_representation}
     application_object_step["step_name"] = deployment_component_name
     application_object_step["step_type"] = deployment_component_type
 
     return application_object_step
-
 
 def parse_application_layer(deployment, infra_object_step):
     ## TODO moved to create_intermediate_representation; to be checked
@@ -296,6 +309,9 @@ def create_intermediate_representation(model_loaded):
             (intermediate_representation_steps.append(application_step) if application_step is not None else None)
         for deployment in list(active_configuration.KubernetesDeployments):
             application_step = parse_k8s_deployment(deployment, infra_object_step)
+            (intermediate_representation_steps.append(application_step) if application_step is not None else None)
+        for deployment in list(active_configuration.ExternalKubernetesDeployments):
+            application_step = parse_k8s_ext_deployment(deployment, infra_object_step)
             (intermediate_representation_steps.append(application_step) if application_step is not None else None)
     intermediate_representation = {
         "output_path": output_path,
