@@ -151,10 +151,14 @@ def parse_k8s_deployment(deployment, infra_object_step):
     object_representation['namespace'] = deployment.eGet('namespace')
 
     # extract and assign autoscaler
-    object_representation['autoscaler'] = DomlParserUtilities.save_attributes(deployment.eGet("autoscaler"), {})
+    try:
+        object_representation['autoscaler'] = DomlParserUtilities.save_attributes(deployment.eGet("autoscaler"), {})
+    except:
+        pass
 
     # fill ds
     application_object_step["data"] = {"KubernetesDeployment" : object_representation}
+    application_object_step["data"]["cluster_name"] = deployment.eGet("cluster").eGet('name')
     application_object_step["step_name"] = deployment_component_name
     application_object_step["step_type"] = "component"
 
@@ -162,18 +166,16 @@ def parse_k8s_deployment(deployment, infra_object_step):
 
 def parse_k8s_ext_deployment(deployment, infra_object_step):
     application_object_step = {"programming_language": "kubernetes", "data": {}}
-    deployment_component_name = "prova_depl"# deployment.component.name
-    deployment_component_type = "appl_type" #deployment.component.eClass.name
-    logging.info(f'Parsing deployment for component {deployment_component_name} of type {deployment_component_type}')
-    object_representation = {}
-
     application_resource = deployment.eGet("component")
-    object_representation['component'] = DomlParserUtilities.save_attributes(application_resource, {})
-    object_representation['url'] = deployment.eGet("url")
+    deployment_component_name = application_resource.eGet("name")
+    logging.info(f'Parsing extenral deployment for component {deployment_component_name}')
+    object_representation = {}
+    object_representation['url'] = deployment.eGet("url").split(',')
 
-    application_object_step["data"] = {"KubernetesDeployment" : object_representation}
+    application_object_step["data"] = {"ExternalKubernetesDeployment" : object_representation}
+    application_object_step["data"]["cluster_name"] = deployment.eGet("cluster").eGet('name')
     application_object_step["step_name"] = deployment_component_name
-    application_object_step["step_type"] = deployment_component_type
+    application_object_step["step_type"] = "component"
 
     return application_object_step
 
