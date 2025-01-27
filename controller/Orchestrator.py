@@ -59,6 +59,10 @@ def choose_plugin(parameters, template_generated_folder):
     # Inner function to be called when visiting graph of container dependencies
     def append_container_name(container_name):
         metadata_root_folder["iac"].append(container_name)
+
+    # used to track all kubernetes resources to be deployed on the cluster
+    kubernetes_resources = {}
+
     for step in parameters["steps"]:
         if step:
             if step["programming_language"] == "ansible":
@@ -90,8 +94,7 @@ def choose_plugin(parameters, template_generated_folder):
                 logging.info("Docker Compose Plugin chosen")
                 input_data = step["data"]
                 # metadata_root_folder["iac"].append("docker-compose")
-                container_graph = DockerComposePlugin.create_container_dependency_graph(input_data,
-                                                                                        Graph(f=append_container_name))
+                container_graph = DockerComposePlugin.create_container_dependency_graph(input_data,Graph(f=append_container_name))
                 # visiting the graph; container names are appended in the right order to the ilst metadata_root_folder["iac"]
                 container_graph.visit()
                 extra_param = parameters["steps"][0]["data"]["containerImages"]
@@ -101,10 +104,29 @@ def choose_plugin(parameters, template_generated_folder):
                 metadata_root_folder["iac"].append("kubernetes")
                 input_data = step["data"]
                 iac_output_folder = template_generated_folder + "kubernetes/" + step['step_name']
+
+                # if extenal just can continue
+                if input_data.get('ExternalKubernetesDeployment',None):
+                    # add resource to resource list
+                    if kubernetes_resources.get(input_data['cluster_name'],None):
+                        kubernetes_resources[input_data['cluster_name']].extend(list(input_data['ExternalKubernetesDeployment']['url']))
+                    else:
+                        kubernetes_resources[input_data['cluster_name']] = list(input_data['ExternalKubernetesDeployment']['url'])
+                    continue
+                # else create deployment IaC and add to list
+                if kubernetes_resources.get(input_data['cluster_name'],None):
+                    kubernetes_resources[input_data['cluster_name']].append(step['step_name'] + '_deployment.yml')
+                else:
+                    kubernetes_resources[input_data['cluster_name']] = [step['step_name'] + '_deployment.yml']
                 kubernetesPlugin.create_files(input_data, iac_output_folder)
+                
     gaiax_file = create_gaiax_file(parameters)
     save_file(gaiax_file, template_generated_folder + "/gaiax_self_description.yaml", output_extensions="YAML")
     save_file(metadata_root_folder, template_generated_folder + "/config.yaml", output_extensions="YAML")
+
+    # generate txt with indication on how to deploy k8s resources
+    if kubernetes_resources:
+        kubernetesPlugin.create_commands(kubernetes_resources,template_generated_folder+"kubernetes")
 
 
 def save_file(data, file_path, output_extensions="json"):
