@@ -1,38 +1,42 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{component.name}}-deployment
+  name: {{name}}-deployment
   labels:
-    app: {{component.name}}
+    app: {{name}}
   namespace: {{namespace}}
 spec:
   replicas: {{replicas}}
   selector:
     matchLabels:
-      app: {{component.name}}
+      app: {{name}}
   template:
     metadata:
       labels:
-        app: {{component.name}}
+        app: {{name}}
     spec:
       containers:
       - name: {{image.name}}
         image: {{image.url}}
-        ports:
+        {% if image.ports %}ports:
         {% for port in image.ports %}- containerPort: {{port.containerPort}}
           name: {{port.name}}
-        {% endfor %}
+        {% endfor %}{% endif %}resources:
+          requests:
+            cpu: 100m
+          limits:
+            cpu: 200m
 {% if image.ports|selectattr("public") | list | length %}---
 
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{component.name}}-service-lb
+  name: {{name}}-service-lb
   namespace: {{namespace}}
 spec:
   type: LoadBalancer
   selector:
-    app: {{component.name}}
+    app: {{name}}
   ports:
   {% for port in image.ports %}{% if port.public %}- name: {{port.name}}
     protocol: TCP
@@ -44,11 +48,11 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{component.name}}-service-ip
+  name: {{name}}-service-ip
   namespace: {{namespace}}
 spec:
   selector:
-    app: {{component.name}}
+    app: {{name}}
   ports:
   {% for port in image.ports %}{% if not port.public %}- name: {{port.name}}
     protocol: TCP
@@ -57,16 +61,16 @@ spec:
   {% endif %}{% endfor %}{% endif %}
 {% if autoscaler %}---
 
-apiVersion: autoscaling/v1
+apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
-  name: {{component.name}}-hpa
+  name: {{name}}-hpa
   namespace: {{namespace}}
 spec:
  scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: {{component.name}}-deployment
+    name: {{name}}-deployment
  minReplicas: {{autoscaler.minSize}}
  maxReplicas: {{autoscaler.maxSize}}
 metrics:

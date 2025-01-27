@@ -25,12 +25,12 @@ module "eks" {
   cluster_endpoint_public_access_cidrs = "{{acceptedAddress}}"
 
   # id of the security group for the cluster
-  cluster_security_group_id = {% if clusterSecurityGroup %} aws_security_group.{{ clusterSecurityGroup }}.id {% else %} {{ [] }} {% endif %}
+  cluster_security_group_id = {% if clusterSecurityGroup %} aws_security_group.{{ clusterSecurityGroup }}_security_group.id {% else %} {{ [] }} {% endif %}
   # id of the vpc and subnets in which the cluster is deployed
   vpc_id                   = awc_vpc.{{deploymentNetwork}}.id
 
   # id of the security group for the nodes
-  node_security_group_id   = {% if nodeSecurityGroup %} aws_security_group.{{ nodeSecurityGroup }}.id {% else %} {{ [] }} {% endif %}
+  node_security_group_id   = {% if nodeSecurityGroup %} aws_security_group.{{ nodeSecurityGroup }}_security_group.id {% else %} {{ [] }} {% endif %}
 
   # defaults for the node groups
   eks_managed_node_group_defaults = {

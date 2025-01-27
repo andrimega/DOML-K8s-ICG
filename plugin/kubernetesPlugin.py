@@ -17,7 +17,7 @@ import logging
 
 from plugin import TemplateUtils
 
-
+## Inserire logica per creare un file di output con gli apply da eseguire
 def create_files(parameters, output_path):
     language = "kubernetes"
     provider_name = "deployment"
