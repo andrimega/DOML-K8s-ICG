@@ -17,15 +17,23 @@ import logging
 
 from plugin import TemplateUtils
 
-## Inserire logica per creare un file di output con gli apply da eseguire
+namespaces = {}
+
+## creates kubernetes yaml file from ir step
 def create_files(parameters, output_path):
     language = "kubernetes"
     provider_name = "deployment"
-
     
     yml_file = ""
     logging.info("Creating yml template for resource 'Kubernetes Deployment'")
     resource_name = 'KubernetesDeployment'
+
+    # add namespace to namespace dict
+    if namespaces.get(parameters['cluster_name'],None):
+        namespaces[parameters['cluster_name']].add(parameters[resource_name]['namespace'])
+    else:
+        namespaces[parameters['cluster_name']] = set()
+        namespaces[parameters['cluster_name']].add(parameters[resource_name]['namespace'])
 
     template_path = TemplateUtils.find_template_path(language, provider_name, resource_name)
     template = TemplateUtils.read_template(template_path)
@@ -35,4 +43,26 @@ def create_files(parameters, output_path):
     yml_file_stored_path = output_path + "_deployment.yml"
     TemplateUtils.write_template(yml_file, yml_file_stored_path)
     logging.info("Deployment file available at: {}".format(yml_file_stored_path)) 
+
+## creates list of commands to deploy resources
+def create_commands(parameters: dict, output_path: str):
+    output = ''
+    commands_path = output_path + "/deployments.txt"
+    configure_kubectl = "aws eks update-kubeconfig --name my-cluster --region us-west-1\n"
+    apply_kubectl = "kubectl apply -f "
+    namespace_kubectl = "kubectl create namespace "
+    # iterate over clusters
+    for cluster_name,resources in parameters.items():
+        # points kubectl to cluster
+        output = output + configure_kubectl.replace('my-cluster',cluster_name)
+        # add namespace creation
+        for namespace in namespaces.get(cluster_name,None):
+            output = output + namespace_kubectl + namespace + '\n'
+        # add resource creation
+        for resource in resources:
+            output = output + apply_kubectl + resource + '\n'
+    with open(commands_path,'w') as out:
+        out.write(output)
+        
+
 
