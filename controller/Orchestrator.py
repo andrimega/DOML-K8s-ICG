@@ -258,6 +258,6 @@ def create_iac_from_doml_path(model_path, is_multiecore_metamodel, metamodel_dir
     template_generated_folder = intermediate_representation["output_path"]
     PiacereInternalToolsIntegrator.add_files_for_piacere_internal_tools(template_generated_folder)
     create_iac_from_intermediate_representation(intermediate_representation)
-    compress_folder_info = compress_iac_folder(template_generated_folder)
+    #compress_folder_info = compress_iac_folder(template_generated_folder)
     #shutil.rmtree(template_generated_folder)
     return compress_folder_info
