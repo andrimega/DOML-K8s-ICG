@@ -208,6 +208,7 @@ def compress_iac_folder(template_generated_folder):
 
 def create_iac_from_intermediate_representation(intermediate_representation):
     logging.info("Creating iac files")
+    intermediate_representation['steps'] = [step for step in intermediate_representation['steps'] if step]
     template_generated_folder = create_infrastructure_files(intermediate_representation)
     return template_generated_folder
 
