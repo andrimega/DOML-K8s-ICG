@@ -28,7 +28,7 @@ resource "aws_subnet" "{{value.name ~ "_subnet"}}" {
   vpc_id = aws_vpc.{{infra_element_name}}.id
   cidr_block = "{{ subnets | selectattr('name', 'equalto', value.name) | map(attribute='addressRange') | first }}"
 {% set az = subnets | selectattr('name', 'equalto', value.name) | map(attribute='availabilityZone') | first %} {% if az %} availability_zone = "{{ az }}" {% endif %}
-  map_public_ip_on_launch  = false
+  map_public_ip_on_launch  = true
   tags = {
     Name = "{{value.name}}"
   }

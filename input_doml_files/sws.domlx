@@ -19,12 +19,25 @@
       <rules name="https" kind="INGRESS" protocol="TCP" fromPort="443" toPort="443">
         <cidr>0.0.0.0/0</cidr>
       </rules>
+      <rules name="node-group" kind="INGRESS" protocol="TCP" fromPort="0" toPort="65535">
+        <cidr>0.0.0.0/0</cidr>
+      </rules>
+      <rules name="kubelet" kind="INGRESS" protocol="TCP" fromPort="10250" toPort="10250">
+        <cidr>0.0.0.0/0</cidr>
+      </rules>
+      <rules name="NodePort" kind="INGRESS" protocol="TCP" fromPort="30000" toPort="32767">
+        <cidr>0.0.0.0/0</cidr>
+      </rules>
+      <rules name="Outbound" kind="EGRESS" protocol="-1" fromPort="0" toPort="0">
+        <cidr>0.0.0.0/0</cidr>
+      </rules>
     </securityGroups>
-    <networks name="common_network" protocol="TCP/IP">
+    <networks name="common_network" protocol="TCP/IP" addressRange="10.100.0.0/16">
+      <subnets name="eks_subnet1" protocol="tcp/ip" availabilityZone="us-west-1a" addressRange="10.100.1.0/24"/>
+      <subnets name="eks_subnet2" protocol="tcp/ip" availabilityZone="us-west-1b" addressRange="10.100.2.0/24"/>
     </networks>
-    <k8s name="Cluster_main" publicAccess="true" clusterSecurityGroup='//@infrastructure/@securityGroups.0' deploymentNetwork="//@infrastructure/@networks.0"> 
-      <nodeGroup name="main_group" minSize="1" maxSize="2" desiredSize="2" type="t3.medium"/>
-      <nodeGroup name="second_group" minSize="2" maxSize="4" desiredSize="2" type="t3.medium"/>
+    <k8s name="Cluster_main" publicAccess="true" nodeSecurityGroup='//@infrastructure/@securityGroups.0' clusterSecurityGroup='//@infrastructure/@securityGroups.0' deploymentNetwork="//@infrastructure/@networks.0" deploymentSubnet="//@infrastructure/@networks.0/@subnets.0 //@infrastructure/@networks.0/@subnets.1"> 
+      <nodeGroup name="main_group" minSize="1" maxSize="3" desiredSize="1" type="m5.large"/>
     </k8s>
     <DeploymentImage name="webserver" url="andreathesis/sws">
         <exposedPort name="http" containerPort="80" externalPort="80" public="true"/>
