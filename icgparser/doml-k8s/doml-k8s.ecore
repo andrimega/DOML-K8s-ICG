@@ -296,6 +296,8 @@
     <eClassifiers xsi:type="ecore:EClass" name="Subnet" eSuperTypes="#//infrastructure/Network">
       <eStructuralFeatures xsi:type="ecore:EReference" name="connectedTo" upperBound="-1"
           eType="#//infrastructure/Subnet"/>
+      <eStructuralFeatures xsi:type="ecore:EAttribute" name="availabilityZone" upperBound="1"
+          eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     </eClassifiers>
     <eClassifiers xsi:type="ecore:EClass" name="NetworkInterface" eSuperTypes="#//infrastructure/InfrastructureElement">
       <eStructuralFeatures xsi:type="ecore:EAttribute" name="speed" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
@@ -350,11 +352,13 @@
       <eStructuralFeatures xsi:type="ecore:EReference" name="nodeGroup" lowerBound="1" upperBound="-1"
           eType="#//infrastructure/KubernetesNodeGroup" containment="true"/>
       <eStructuralFeatures xsi:type="ecore:EAttribute" name="publicAccess" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBooleanObject" defaultValueLiteral="true"/>
-      <eStructuralFeatures xsi:type="ecore:EAttribute" name="acceptedAddress" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString" defaultValueLiteral="[0.0.0.0/0]"/> 
+      <eStructuralFeatures xsi:type="ecore:EAttribute" name="acceptedAddress" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString" defaultValueLiteral='"0.0.0.0/0"'/> 
       <eStructuralFeatures xsi:type="ecore:EReference" name="clusterSecurityGroup" eType="#//infrastructure/SecurityGroup" containment="true" defaultValueLiteral="[]"/>
       <eStructuralFeatures xsi:type="ecore:EReference" name="nodeSecurityGroup" eType="#//infrastructure/SecurityGroup"
           containment="true" defaultValueLiteral="[]"/>
       <eStructuralFeatures xsi:type="ecore:EReference" name="deploymentNetwork" eType="#//infrastructure/Network"/>
+      <eStructuralFeatures xsi:type="ecore:EReference" name="deploymentSubnet" eType="#//infrastructure/Subnet" upperBound="-1"/>
+      
     </eClassifiers>
     <eClassifiers xsi:type="ecore:EClass" name="KubernetesNodeGroup" eSuperTypes="#//infrastructure/ExtInfrastructureElement">
       <eStructuralFeatures xsi:type="ecore:EAttribute" name="minSize" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EIntegerObject"/>
