@@ -19,7 +19,7 @@ resource "aws_security_group" "{{ infra_element_name ~ "_security_group" }}" {
   name        = "{{ infra_element_name }}"
   vpc_id      = aws_vpc.{{extra_parameters.networks[0].infra_element_name}}.id
 {%- for key, value in context().items() %}{% if not callable(value)%} {%if value.kind and value.kind is defined %}
-  {% if value == "INGRESS" %}ingress{% else %}egress{%- endif %} {
+  {% if value.kind == "INGRESS" %}ingress{% else %}egress{%- endif %} {
     from_port   = {{ value.fromPort }}
     to_port     = {{ value.toPort }}
     protocol = "{{ value.protocol }}"

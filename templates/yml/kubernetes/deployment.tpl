@@ -73,9 +73,9 @@ spec:
     name: {{name}}-deployment
  minReplicas: {{autoscaler.minSize}}
  maxReplicas: {{autoscaler.maxSize}}
-metrics:
-- type: Resource
-  resource:
+ metrics:
+ - type: Resource
+   resource:
     name: {{autoscaler.metric}}
     target:
       type: {{autoscaler.metricType}}

@@ -21,11 +21,13 @@ resource "aws_vpc" "{{infra_element_name}}" {
   }
 }
 {##-------- Subnets Here ##}
+{% set subnet_list = namespace(names=[]) %}
 {% for key, value in context().items() %}{% if not callable(value)%}{%if key.startswith('Subnet') %}
-# Subnet
+# Subnet {% set subnet_list.names = subnet_list.names + [value.name+"_subnet"] %}
 resource "aws_subnet" "{{value.name ~ "_subnet"}}" {
   vpc_id = aws_vpc.{{infra_element_name}}.id
-  cidr_block = "{{ subnets | selectattr('maps', 'equalto', value.name) | map(attribute='addressRange') | first }}"
+  cidr_block = "{{ subnets | selectattr('name', 'equalto', value.name) | map(attribute='addressRange') | first }}"
+{% set az = subnets | selectattr('name', 'equalto', value.name) | map(attribute='availabilityZone') | first %} {% if az %} availability_zone = "{{ az }}" {% endif %}
   map_public_ip_on_launch  = false
   tags = {
     Name = "{{value.name}}"
@@ -39,5 +41,26 @@ resource "aws_internet_gateway" "{{value.name ~ "_internet_gw_subnet"}}" {
   tags = {
     Name = "{{value.name}}"
   }
-}{% endif %}{% endif %}{% endfor %}
+}
+
+# Route table
+resource "aws_route_table" "{{value.name}}_route_table" {
+  vpc_id = aws_vpc.{{infra_element_name}}.id
+  route {
+    cidr_block = "0.0.0.0/0"
+    gateway_id = aws_internet_gateway.{{value.name ~ "_internet_gw_subnet"}}.id
+  }
+  tags = {
+    Name = "{{value.name}}"
+  }
+}
+
+{% for sub_name in subnet_list.names %}
+# Route table association
+resource "aws_route_table_association" "{{sub_name}}_route_assoc" {
+  subnet_id      = aws_subnet.{{sub_name}}.id
+  route_table_id = aws_route_table.{{value.name}}_route_table.id
+}{% endfor %}
+{% endif %}{% endif %}{% endfor %}
+
 
