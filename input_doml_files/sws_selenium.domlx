@@ -44,7 +44,7 @@
         <exposedPort name="port2" containerPort="4443" externalPort="4443" public="true"/>
         <exposedPort name="port3" containerPort="4444" externalPort="4444" public="true"/>
     </DeploymentImage>
-    <DeploymentImage name="selenium-node" url="selenium/node-chrome:4.1.0"/>
+    <DeploymentImage name="selenium-node" url="andreathesis/sel-node"/>
     <DeploymentImage name="metric-exporter" url="andreathesis/queue-size-exporter">
         <exposedPort name="http" containerPort="8080" externalPort="8080" public="false"/>
     </DeploymentImage>
