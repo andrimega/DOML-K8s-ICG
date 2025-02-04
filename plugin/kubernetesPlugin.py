@@ -57,7 +57,8 @@ def create_commands(parameters: dict, output_path: str):
         output = output + configure_kubectl.replace('my-cluster',cluster_name)
         # add namespace creation
         for namespace in namespaces.get(cluster_name,None):
-            output = output + namespace_kubectl + namespace + '\n'
+            if namespace != 'default':
+                output = output + namespace_kubectl + namespace + '\n'
         # add resource creation
         for resource in resources:
             output = output + apply_kubectl + resource + '\n'
