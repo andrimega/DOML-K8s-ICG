@@ -1,0 +1,9 @@
+cff-version: 1.2.0
+message: "This Repository is an extension of the official Tecnalia DOML repository"
+authors:
+  - family-names: Pirrotta
+    given-names: Andrea
+    orcid: https://orcid.org/1234-5678-9101-1121
+title: "DOML-K8s ICG"
+version: 1.0
+date-released: 2025-02-05
